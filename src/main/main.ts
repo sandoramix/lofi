@@ -327,6 +327,8 @@ const createMainWindow = (): void => {
           childWindow.setWindowButtonVisibility(false);
         }
         childWindow.center();
+        setAlwaysOnTop({ window: childWindow, isAlwaysOnTop: true });
+        childWindow.focus();
         break;
       }
 
@@ -407,6 +409,11 @@ app.on('ready', () => {
     }
 
     setAlwaysOnTop({ window: mainWindow, isAlwaysOnTop: settings.isAlwaysOnTop });
+
+    const clientIdWindow = findWindow(WindowTitle.ClientId);
+    if (clientIdWindow) {
+      clientIdWindow.focus();
+    }
 
     const bounds = mainWindow.getBounds();
     const currentDisplay = screen.getDisplayMatching(bounds);
