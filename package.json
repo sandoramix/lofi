@@ -41,7 +41,7 @@
         "provider": "github",
         "owner": "sandoramix",
         "repo": "lofi",
-        "releaseType": "draft"
+        "releaseType": "release"
       }
     ]
   },
