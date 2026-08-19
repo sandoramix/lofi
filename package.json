@@ -19,7 +19,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "prepare": "husky install"
   },
-  "repository": "https://github.com/dvx/lofi.git",
+  "repository": "https://github.com/sandoramix/lofi.git",
   "author": "David Titarenco <david.titarenco@gmail.com>",
   "license": "MIT",
   "private": true,
@@ -39,6 +39,8 @@
     "publish": [
       {
         "provider": "github",
+        "owner": "sandoramix",
+        "repo": "lofi",
         "releaseType": "draft"
       }
     ]
