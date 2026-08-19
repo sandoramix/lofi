@@ -9,6 +9,7 @@ export enum SettingsActionType {
   SetSize = 'setSize',
   SetTokens = 'setTokens',
   ResetTokens = 'resetTokens',
+  SetAuthClientId = 'setAuthClientId',
   UpdateSettings = 'updateSettings',
 }
 
@@ -39,6 +40,10 @@ export type SettingsAction =
     }
   | {
       type: SettingsActionType.ResetTokens;
+    }
+  | {
+      type: SettingsActionType.SetAuthClientId;
+      payload: string;
     }
   | {
       type: SettingsActionType.UpdateSettings;
@@ -96,6 +101,13 @@ export const useSettingsReducer = (state: Settings, action: SettingsAction): Set
         ...state,
         accessToken: '',
         refreshToken: '',
+      };
+    }
+
+    case SettingsActionType.SetAuthClientId: {
+      return {
+        ...state,
+        authClientId: action.payload,
       };
     }
 

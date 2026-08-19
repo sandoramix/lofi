@@ -48,7 +48,11 @@ const WelcomeControls = styled.div`
   z-index: 2;
 `;
 
-export const Welcome: FunctionComponent = () => (
+interface Props {
+  clientId: string;
+}
+
+export const Welcome: FunctionComponent<Props> = ({ clientId }) => (
   <div className="full">
     <Menu isWelcome visualizationType={VisualizationType.None} />
     <WelcomeContent className="welcome-content centered draggable">
@@ -59,7 +63,7 @@ export const Welcome: FunctionComponent = () => (
       <BrandTagLine className="brand-tagline draggable">a tiny player</BrandTagLine>
     </WelcomeContent>
     <WelcomeControls className="centered controls draggable">
-      <LoginButton />
+      {clientId && <LoginButton clientId={clientId} />}
     </WelcomeControls>
   </div>
 );

@@ -73,6 +73,12 @@ class SpotifyApi {
 
   private refreshToken: string;
 
+  private clientId: string;
+
+  setClientId(clientId: string): void {
+    this.clientId = clientId;
+  }
+
   async updateTokens(data: AuthData): Promise<SpotifyUserProfile> {
     this.accessToken = data?.access_token;
     this.refreshToken = data?.refresh_token;
@@ -177,8 +183,8 @@ class SpotifyApi {
         return null;
       }
       case 401: {
-        if (this.refreshToken) {
-          await refreshAccessToken(this.refreshToken);
+        if (this.refreshToken && this.clientId) {
+          await refreshAccessToken(this.clientId, this.refreshToken);
         }
         break;
       }

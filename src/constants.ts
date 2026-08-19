@@ -19,6 +19,7 @@ export const MAX_SKIP_SONG_DELAY = 60;
 
 export enum WindowTitle {
   About = 'About Lofi',
+  ClientId = 'Lofi Spotify Setup',
   FullscreenViz = 'fullscreen-visualization',
   Settings = 'Lofi Settings',
   TrackInfo = 'track-info',
@@ -27,6 +28,7 @@ export enum WindowTitle {
 export enum WindowName {
   About = 'about',
   Auth = 'auth',
+  ClientId = 'client-id',
   FullscreenViz = 'fullscreen-visualization',
   Settings = 'settings',
   TrackInfo = 'track-info',
@@ -54,4 +56,8 @@ export enum ApplicationUrl {
   Discord = 'https://discord.gg/YuH9UJk',
   GitHub = 'https://github.com/dvx/lofi',
   Spotify = 'spotify:',
+  SpotifyDashboard = 'https://developer.spotify.com/dashboard',
 }
+
+export const AUTH_PORT = 41419;
+export const AUTH_REDIRECT_URI = `http://127.0.0.1:${AUTH_PORT}`;

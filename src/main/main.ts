@@ -35,6 +35,7 @@ import {
   checkIfAppIsOnLeftSide,
   findWindow,
   getAboutWindowOptions,
+  getClientIdWindowOptions,
   getFullscreenVisualizationWindowOptions,
   getFullscreenVizBounds,
   getSettingsWindowOptions,
@@ -255,6 +256,13 @@ const createMainWindow = (): void => {
         };
       }
 
+      case WindowName.ClientId: {
+        return {
+          action: 'allow',
+          overrideBrowserWindowOptions: getClientIdWindowOptions(),
+        };
+      }
+
       case WindowName.TrackInfo: {
         return {
           action: 'allow',
@@ -307,6 +315,14 @@ const createMainWindow = (): void => {
 
       case WindowName.Settings: {
         childWindow.webContents.setWindowOpenHandler(windowOpenHandler);
+        if (MACOS) {
+          childWindow.setWindowButtonVisibility(false);
+        }
+        childWindow.center();
+        break;
+      }
+
+      case WindowName.ClientId: {
         if (MACOS) {
           childWindow.setWindowButtonVisibility(false);
         }

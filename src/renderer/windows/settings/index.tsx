@@ -67,9 +67,17 @@ interface Props {
   onClose: () => void;
   onSave: (data: Settings) => void;
   onLogout: () => void;
+  onEditClientId: () => void;
 }
 
-export const SettingsWindow: FunctionComponent<Props> = ({ initialValues, displays, onClose, onSave, onLogout }) => {
+export const SettingsWindow: FunctionComponent<Props> = ({
+  initialValues,
+  displays,
+  onClose,
+  onSave,
+  onLogout,
+  onEditClientId,
+}) => {
   const methods = useForm<Settings>({
     defaultValues: getDefaultValues(initialValues, displays),
   });
@@ -131,7 +139,7 @@ export const SettingsWindow: FunctionComponent<Props> = ({ initialValues, displa
               </Tabs.Panel>
 
               <Tabs.Panel value={Tab.Advanced}>
-                <AdvancedSettings />
+                <AdvancedSettings onEditClientId={onEditClientId} />
               </Tabs.Panel>
             </StyledTabs>
           </TabsWrapper>

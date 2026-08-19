@@ -15,6 +15,7 @@ import { DisplayData } from '../models';
 import { CurrentlyPlayingActions } from '../reducers/currently-playing.reducer';
 import { SettingsActionType } from '../reducers/settings.reducer';
 import { About } from '../windows/about';
+import { ClientIdWindow } from '../windows/client-id';
 import { FullscreenVisualizer } from '../windows/fullscreen-visualizer';
 import { SettingsWindow } from '../windows/settings';
 import { Cover } from './cover';
@@ -78,8 +79,20 @@ export const App: FunctionComponent = () => {
 
   const { state, dispatch } = useSettings();
   const { state: currentlyPlaying, dispatch: currentlyPlayingDispatch } = useCurrentlyPlaying();
-  const { accessToken, refreshToken, visualizationId, visualizationType } = state || DEFAULT_SETTINGS;
+  const { accessToken, refreshToken, authClientId, visualizationId, visualizationType } = state || DEFAULT_SETTINGS;
   const { cornerRadius } = useMemo(() => state, [state]);
+
+  const [shouldShowClientIdPrompt, setShouldShowClientIdPrompt] = useState(!authClientId);
+  const [shouldShowEditClientId, setShouldShowEditClientId] = useState(false);
+
+  const handleSaveClientId = useCallback(
+    (clientId: string) => {
+      dispatch({ type: SettingsActionType.SetAuthClientId, payload: clientId });
+      setShouldShowClientIdPrompt(false);
+      setShouldShowEditClientId(false);
+    },
+    [dispatch]
+  );
 
   const updateTokens = useCallback(
     async (data: AuthData) => {
@@ -124,6 +137,10 @@ export const App: FunctionComponent = () => {
   }, []);
 
   useEffect(() => {
+    SpotifyApiInstance.setClientId(authClientId);
+  }, [authClientId]);
+
+  useEffect(() => {
     if (visualizationType === VisualizationType.Big) {
       setShouldShowFullscreenViz(true);
     }
@@ -131,15 +148,15 @@ export const App: FunctionComponent = () => {
 
   const handleAuth = useCallback(async () => {
     try {
-      if (refreshToken) {
-        await refreshAccessToken(refreshToken);
+      if (refreshToken && authClientId) {
+        await refreshAccessToken(authClientId, refreshToken);
       }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
       await updateTokens(null);
     }
-  }, [refreshToken, updateTokens]);
+  }, [authClientId, refreshToken, updateTokens]);
 
   useEffect(() => {
     ipcRenderer.on(IpcMessage.ShowAbout, () => setShouldShowAbout(true));
@@ -287,6 +304,23 @@ export const App: FunctionComponent = () => {
             onSave={handleSettingsSave}
             onClose={() => setShouldShowSettings(false)}
             onLogout={() => updateTokens(null)}
+            onEditClientId={() => setShouldShowEditClientId(true)}
+          />
+        </WindowPortal>
+      )}
+
+      {shouldShowClientIdPrompt && (
+        <WindowPortal name={WindowName.ClientId}>
+          <ClientIdWindow initialValue={authClientId} onSave={handleSaveClientId} />
+        </WindowPortal>
+      )}
+
+      {shouldShowEditClientId && (
+        <WindowPortal onUnload={() => setShouldShowEditClientId(false)} name={WindowName.ClientId}>
+          <ClientIdWindow
+            initialValue={authClientId}
+            onSave={handleSaveClientId}
+            onClose={() => setShouldShowEditClientId(false)}
           />
         </WindowPortal>
       )}
@@ -314,7 +348,7 @@ export const App: FunctionComponent = () => {
           onVisualizationCycle={handleVisualizationCycle}
         />
       ) : (
-        <Welcome />
+        <Welcome clientId={authClientId} />
       )}
     </VisibleUi>
   );

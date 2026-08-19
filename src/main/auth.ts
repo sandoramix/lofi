@@ -2,6 +2,8 @@
 import crypto from 'crypto';
 import * as http from 'http';
 
+import { AUTH_PORT, AUTH_REDIRECT_URI } from '../constants';
+
 export interface AuthData {
   access_token: string;
   refresh_token: string;
@@ -17,10 +19,6 @@ let onTokenRetrieved: (data: AuthData) => void = null;
 
 const AUTH_URL = 'https://accounts.spotify.com/authorize';
 const AUTH_TOKEN_URL = 'https://accounts.spotify.com/api/token';
-// TODO: migrate to `dotenv` or `t3-env` usage instead of keeping the client id in the code
-// (This is the original developer's client id, which is not valid anymore)
-const AUTH_CLIENT_ID = '69eca11b9ccd4bd3a7e01e6f9ddb5205';
-const AUTH_PORT = 41419;
 const AUTH_SCOPES = [
   'user-read-playback-state',
   'user-modify-playback-state',
@@ -44,14 +42,14 @@ export const setTokenRetrievedCallback = (callback: (data: AuthData) => void): v
   onTokenRetrieved = callback;
 };
 
-export const getAuthUrl = (): string => {
+export const getAuthUrl = (clientId: string): string => {
   codeVerifier = base64URLEncode(crypto.randomBytes(32));
   codeState = base64URLEncode(crypto.randomBytes(32));
   const codeChallenge = base64URLEncode(sha256(codeVerifier));
   const scopes = AUTH_SCOPES.join('%20');
 
   const authUrl =
-    `${AUTH_URL}?response_type=code&client_id=${AUTH_CLIENT_ID}&redirect_uri=http://127.0.0.1:${AUTH_PORT}&` +
+    `${AUTH_URL}?response_type=code&client_id=${clientId}&redirect_uri=${AUTH_REDIRECT_URI}&` +
     `scope=${scopes}&state=${codeState}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
 
   return authUrl;
@@ -68,7 +66,7 @@ const scopesMatch = (scope: string): boolean => {
   return isScopesMatch;
 };
 
-const setRefreshTokenInterval = (data: AuthData): void => {
+const setRefreshTokenInterval = (clientId: string, data: AuthData): void => {
   if (refreshTokenTimeoutId) {
     clearInterval(refreshTokenTimeoutId);
     refreshTokenTimeoutId = null;
@@ -78,17 +76,17 @@ const setRefreshTokenInterval = (data: AuthData): void => {
     const expiresIn = data.expires_in ?? 60 * 60;
     refreshTokenTimeoutId = setInterval(
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      () => refreshAccessToken(data.refresh_token),
+      () => refreshAccessToken(clientId, data.refresh_token),
       // refresh at token's half-life ('expires_in' is in seconds)
       (expiresIn * 1000) / 2
     );
   }
 };
 
-export const refreshAccessToken = async (refreshToken: string): Promise<void> => {
+export const refreshAccessToken = async (clientId: string, refreshToken: string): Promise<void> => {
   console.log('Refreshing access token...');
 
-  const body = `client_id=${AUTH_CLIENT_ID}&grant_type=refresh_token&refresh_token=${refreshToken}`;
+  const body = `client_id=${clientId}&grant_type=refresh_token&refresh_token=${refreshToken}`;
 
   const res = await fetch(AUTH_TOKEN_URL, {
     method: 'POST',
@@ -113,16 +111,16 @@ export const refreshAccessToken = async (refreshToken: string): Promise<void> =>
     console.log('Access token refreshed.');
   }
 
-  setRefreshTokenInterval(data);
+  setRefreshTokenInterval(clientId, data);
   onTokenRetrieved(data);
 };
 
-const retrieveAccessToken = async (verifier: string, code: string): Promise<AuthData> => {
+const retrieveAccessToken = async (clientId: string, verifier: string, code: string): Promise<AuthData> => {
   console.log('Retrieving access token...');
 
   const body =
-    `client_id=${AUTH_CLIENT_ID}&grant_type=authorization_code&` +
-    `code=${code}&redirect_uri=http://127.0.0.1:${AUTH_PORT}&code_verifier=${verifier}`;
+    `client_id=${clientId}&grant_type=authorization_code&` +
+    `code=${code}&redirect_uri=${AUTH_REDIRECT_URI}&code_verifier=${verifier}`;
 
   const res = await fetch(AUTH_TOKEN_URL, {
     method: 'POST',
@@ -150,7 +148,11 @@ const stopServer = (): void => {
   }
 };
 
-const handleServerResponse = async (request: http.IncomingMessage, response: http.ServerResponse): Promise<void> => {
+const handleServerResponse = async (
+  clientId: string,
+  request: http.IncomingMessage,
+  response: http.ServerResponse
+): Promise<void> => {
   const urlObj = new URL(`http://127.0.0.1:${AUTH_PORT}/${request.url}`);
   const queryState = urlObj.searchParams.get('state');
 
@@ -177,8 +179,8 @@ const handleServerResponse = async (request: http.IncomingMessage, response: htt
 
     const code = urlObj.searchParams.get('code');
     if (code) {
-      const data = await retrieveAccessToken(codeVerifier, code);
-      setRefreshTokenInterval(data);
+      const data = await retrieveAccessToken(clientId, codeVerifier, code);
+      setRefreshTokenInterval(clientId, data);
       response.end('Lofi authorization successful, you may now close this window.');
       onTokenRetrieved(data);
     }
@@ -189,11 +191,11 @@ const handleServerResponse = async (request: http.IncomingMessage, response: htt
   }
 };
 
-export const startAuthServer = (): void => {
+export const startAuthServer = (clientId: string): void => {
   console.log('Starting auth server...');
   if (!server) {
     server = http.createServer(async (request, response) => {
-      await handleServerResponse(request, response);
+      await handleServerResponse(clientId, request, response);
     });
 
     server.listen(AUTH_PORT);

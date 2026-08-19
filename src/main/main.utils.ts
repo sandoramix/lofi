@@ -43,6 +43,15 @@ export const getAboutWindowOptions = (): BrowserWindowConstructorOptions => ({
   title: WindowTitle.About,
 });
 
+export const getClientIdWindowOptions = (): BrowserWindowConstructorOptions => ({
+  ...getCommonWindowOptions(),
+  height: 520,
+  minHeight: 520,
+  width: 420,
+  minWidth: 420,
+  title: WindowTitle.ClientId,
+});
+
 export const getFullscreenVisualizationWindowOptions = (displayBounds: Rectangle): BrowserWindowConstructorOptions => ({
   ...getCommonWindowOptions(),
   height: displayBounds.height,
@@ -131,6 +140,7 @@ export const moveTrackInfo = (mainWindow: BrowserWindow, screen: Screen): void =
 export const settingsSchema = z.object({
   x: z.number(),
   y: z.number(),
+  authClientId: z.string().optional(),
   visualizationId: z
     .number()
     .min(0)

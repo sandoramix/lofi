@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { getAuthUrl, startAuthServer } from '../../main/auth';
@@ -33,10 +33,16 @@ const SpotifyLogo = styled.i`
   margin-right: 0.5rem;
 `;
 
-export const LoginButton: FunctionComponent = () => {
-  const authUrl = useMemo(getAuthUrl, []);
+interface Props {
+  clientId: string;
+}
+
+export const LoginButton: FunctionComponent<Props> = ({ clientId }) => {
+  const authUrl = useMemo(() => getAuthUrl(clientId), [clientId]);
+  const handleClick = useCallback(() => startAuthServer(clientId), [clientId]);
+
   return (
-    <Link className="login-btn" target="auth" href={authUrl} onClick={startAuthServer}>
+    <Link className="login-btn" target="auth" href={authUrl} onClick={handleClick}>
       <SpotifyLogo className="fab fa-spotify" />
       <span>Log in</span>
     </Link>

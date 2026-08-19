@@ -2,10 +2,14 @@ import React, { FunctionComponent } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { DEFAULT_SETTINGS, Settings } from '../../../models/settings';
-import { FieldSet, FormGroup, Label, Legend, RangeValue, Row, Slider, StyledCheckbox } from '../../components';
+import { FieldSet, FormGroup, Input, Label, Legend, RangeValue, Row, Slider, StyledCheckbox } from '../../components';
 import { INPUT_COLOR } from '../../components/mantine.styled';
 
-export const AdvancedSettings: FunctionComponent = () => {
+interface Props {
+  onEditClientId: () => void;
+}
+
+export const AdvancedSettings: FunctionComponent<Props> = ({ onEditClientId }) => {
   const { register, watch } = useFormContext<Settings>();
 
   const refreshTimeWatch = watch('trackInfoRefreshTimeInSeconds');
@@ -37,6 +41,12 @@ export const AdvancedSettings: FunctionComponent = () => {
               {...register('trackInfoRefreshTimeInSeconds', { required: true, valueAsNumber: true })}
             />
             <RangeValue>{refreshTimeWatch}</RangeValue>
+          </Label>
+        </Row>
+        <Row>
+          <Label>
+            Spotify Client ID
+            <Input type="button" value="Change..." onClick={onEditClientId} />
           </Label>
         </Row>
       </FieldSet>
