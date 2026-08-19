@@ -1,5 +1,9 @@
 name: release
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 jobs:
   release:
     runs-on: ${{ matrix.os }}
