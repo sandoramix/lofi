@@ -45,8 +45,8 @@ export const getAboutWindowOptions = (): BrowserWindowConstructorOptions => ({
 
 export const getClientIdWindowOptions = (): BrowserWindowConstructorOptions => ({
   ...getCommonWindowOptions(),
-  height: 520,
-  minHeight: 520,
+  height: 420,
+  minHeight: 420,
   width: 420,
   minWidth: 420,
   title: WindowTitle.ClientId,

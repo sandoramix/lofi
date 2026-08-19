@@ -100,7 +100,8 @@ export const ClientIdWindow: FunctionComponent<Props> = ({ initialValue, onSave,
             Click <strong>Create app</strong>, give it any name/description, and select the Web API.
           </Step>
           <Step>
-            In the app&apos;s <strong>Settings</strong>, add this exact Redirect URI:{' '}
+            In the app&apos;s <strong>Settings</strong>, add this exact Redirect URI:
+            <br />
             <RedirectUri>{AUTH_REDIRECT_URI}</RedirectUri>
           </Step>
           <Step>
